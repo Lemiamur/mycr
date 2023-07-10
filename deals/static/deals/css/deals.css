@@ -1,0 +1,48 @@
+.kanban {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.column {
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  width: calc(33.33% - 20px);
+  flex-grow: 1;
+}
+
+h2 {
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.task {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+h3 {
+  color: #333;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+p {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+p.empty-message {
+  color: #999;
+  font-size: 14px;
+  margin-top: 10px;
+}

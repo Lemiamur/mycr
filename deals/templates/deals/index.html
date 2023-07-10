@@ -1,0 +1,55 @@
+{% extends "core/index.html" %}
+{% load static %}
+{% block title %}BBcrm{% endblock title %}
+
+{% block deals %}
+
+<link href="{% static 'deals/css/deals.css'%}" rel="stylesheet">
+<script src="{% static 'deals/js/deals.js' %}"></script>
+
+<div class="kanban">
+    <div class="column" id="todo-column">
+        <h2>To Do</h2>
+        {% for task in tasks %}
+        {% if task.status == 'todo' %}
+        <div class="task">
+            <h3>{{ task.title }}</h3>
+            <p>{{ task.description }}</p>
+        </div>
+        {% endif %}
+        {% empty %}
+        <p>No tasks in this column.</p>
+        {% endfor %}
+    </div>
+
+    <div class="column" id="inprogress-column">
+        <h2>In Progress</h2>
+        {% for task in tasks %}
+        {% if task.status == 'inprogress' %}
+        <div class="task">
+            <h3>{{ task.title }}</h3>
+            <p>{{ task.description }}</p>
+            <button class="btn">hi</button>
+        </div>
+        {% endif %}
+        {% empty %}
+        <p>No tasks in this column.</p>
+        {% endfor %}
+    </div>
+
+    <div class="column" id="done-column">
+        <h2>Done</h2>
+        {% for task in tasks %}
+        {% if task.status == 'done' %}
+        <div class="task">
+            <h3>{{ task.title }}</h3>
+            <p>{{ task.description }}</p>
+        </div>
+        {% endif %}
+        {% empty %}
+        <p>No tasks in this column.</p>
+        {% endfor %}
+    </div>
+</div>
+{% csrf_token %}
+{% endblock deals %}
