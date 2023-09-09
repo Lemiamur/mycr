@@ -2,6 +2,109 @@
 {% load static %}
 {% block title %}BBcrm{% endblock title %}
 
-{% block contacts %}
-Привет
-{% endblock contacts %}
+{% block content %}
+<link href="{% static 'contacts\css\contacts.css'%}" rel="stylesheet">
+<script src="{% static 'contact/js/contact.js' %}"></script>
+<script src="{% static 'contact/js/tailwind.config.js' %}"></script>
+
+<a class="button btn btn-primary" href="#popup1">Добавить контакт</a>
+
+<form id="search-form">
+    <input type="text" id="search-input" placeholder="Поиск по заголовку">
+</form>
+
+<table class="table-fill">      
+    <thead>
+        <tr>
+            <th class="text-left">Name</th>
+            <th class="text-left">Phone</th>
+            <th class="text-left">Date</th>
+            <th class="text-left"></th>
+        </tr>
+    </thead>    
+    <tbody class="table-hover">
+        {% for contact in contacts %}
+        <tr onclick="location.href='#popup2{{ contact.id }}'; return false;">
+            <td class="text-left">{{ contact.Name }}</td>
+            <td class="text-left">{{ contact.Phone }}</td>
+            <td class="text-left">{{ contact.created_at }}</td>
+            <td class="text-left">
+                <form method="post" action="{% url 'contact:delete_contact' contact.id %}">  
+                    {% csrf_token %}
+                    <button  class="btn btn-danger">Удалить</button> <!-- тут вызов окна удаления -->
+                </form>
+            </td>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div id="popup1" class="overlay">
+  <div class="popup">
+    <form method="post">
+        {% csrf_token %}
+        <br>
+        <input type="text" placeholder="Name" class="form-control" name="Name" value="{{ contact.Name }}"><br>
+        <input type="tel" placeholder="Phone" class="form-control" name="Phone" value="{{ contact.Phone }}"><br>
+        <input type="email" placeholder="Email" class="form-control" name="Email" value="{{ contact.email }}"><br>
+        <textarea placeholder="Message" class="form-control" name="Message">{{ contact.message }}</textarea><br>
+        <input type="date" class="form-control" name="created_at" value="{{ contact.created_at|date:'Y-m-d' }}"><br>
+        <span>{{ error }}</span>
+        <button class="btn btn-success text-teal-950" type="submit">Добавить</button>
+    </form>
+    <a class="close" href="#">&times;</a>
+  </div>    
+</div>
+
+{% for contact in contacts %}
+<div id="popup2{{ contact.id }}" class="overlay">
+    <div class="popup">
+        <form method="post" action="{% url 'contact:update_contact' contact.id %}">
+            {% csrf_token %}
+            <br>
+            <input type="text" placeholder="Name" class="form-control" name="Name" value="{{ contact.Name }}"><br>
+            <input type="tel" placeholder="Phone" class="form-control" name="Phone" value="{{ contact.Phone }}"><br>
+            <input type="email" placeholder="Email" class="form-control" name="Email" value="{{ contact.email }}"><br>
+            <textarea placeholder="Message" class="form-control" name="Message">{{ contact.message }}</textarea><br>
+            <input type="date" class="form-control" name="created_at" value="{{ contact.created_at|date:'Y-m-d' }}"><br>
+            <span>{{ error }}</span>
+            <button class="btn btn-success text-teal-950" type="submit">Изменить</button>
+        </form>
+        <a class="close" href="#">&times;</a>
+    </div>    
+</div>
+{% endfor %}
+
+<script>
+    // Скрпит поиска
+
+    const searchInput = document.getElementById('search-input'); // Поле ввода для поиска
+    const rows = document.querySelectorAll('.table-hover tr'); // Все строки таблицы
+
+    // Добавление обработчика события "input" для поля поиска
+    searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.trim().toLowerCase(); // Получение текста поиска без пробелов в начале и конце, перевод в нижний регистр
+    
+        // Перебор всех строк таблицы
+        rows.forEach(row => {
+            let rowContainsSearchTerm = false; // Флаг, указывающий, содержит ли строка текст поиска
+            
+            // Перебор всех ячеек в текущей строке
+            row.querySelectorAll('td').forEach(cell => {
+                const cellText = cell.textContent.toLowerCase(); // Текст текущей ячейки
+                if (cellText.includes(searchTerm)) { // Если текст ячейки содержит текст поиска
+                    rowContainsSearchTerm = true; // Установить флаг в true
+                }
+            });
+            
+            // Отобразить или скрыть строку в зависимости от флага
+            if (rowContainsSearchTerm) {
+                row.style.display = 'table-row'; // Отобразить строку
+            } else {
+                row.style.display = 'none'; // Скрыть строку
+            }
+        });
+    });
+</script>
+{% endblock content %}

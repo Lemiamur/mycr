@@ -2,54 +2,106 @@
 {% load static %}
 {% block title %}BBcrm{% endblock title %}
 
-{% block deals %}
-
+{% block content %}
 <link href="{% static 'deals/css/deals.css'%}" rel="stylesheet">
 <script src="{% static 'deals/js/deals.js' %}"></script>
+<script src="{% static 'deals/js/tailwind.config.js' %}"></script>
 
-<div class="kanban">
-    <div class="column" id="todo-column">
-        <h2>To Do</h2>
-        {% for task in tasks %}
-        {% if task.status == 'todo' %}
-        <div class="task">
-            <h3>{{ task.title }}</h3>
-            <p>{{ task.description }}</p>
-        </div>
-        {% endif %}
-        {% empty %}
-        <p>No tasks in this column.</p>
-        {% endfor %}
-    </div>
+<a class="button btn btn-primary" href="#popup1">Открыть сделку</a>
 
-    <div class="column" id="inprogress-column">
-        <h2>In Progress</h2>
-        {% for task in tasks %}
-        {% if task.status == 'inprogress' %}
-        <div class="task">
-            <h3>{{ task.title }}</h3>
-            <p>{{ task.description }}</p>
-            <button class="btn">hi</button>
-        </div>
-        {% endif %}
-        {% empty %}
-        <p>No tasks in this column.</p>
-        {% endfor %}
-    </div>
+<form id="search-form">
+    <input type="text" id="search-input" placeholder="Поиск по заголовку">
+</form>
 
-    <div class="column" id="done-column">
-        <h2>Done</h2>
-        {% for task in tasks %}
-        {% if task.status == 'done' %}
-        <div class="task">
-            <h3>{{ task.title }}</h3>
-            <p>{{ task.description }}</p>
-        </div>
-        {% endif %}
-        {% empty %}
-        <p>No tasks in this column.</p>
+<table class="table-fill">      
+    <thead>
+        <tr>
+            <th class="text-left">Label</th>
+            <th class="text-left">Message</th>
+            <th class="text-left">Date</th>
+            <th class="text-left"></th>
+        </tr>
+    </thead>    
+    <tbody class="table-hover">
+        {% for deal in deals %}
+        <tr>
+            <td class="text-left">{{ deal.deal_label }}</td>
+            <td class="text-left">{{ deal.deal_message }}</td>
+            <td class="text-left">{{ deal.created_at }}</td>
+            <td class="text-left">
+                <form method="post" action="{% url 'deals:delete_deal' deal.id %}">  
+                    {% csrf_token %}
+                    <button  class="btn btn-danger">Удалить</button> <!-- тут вызов окна удаления -->
+                </form>
+                <a href="#popup2{{ deal.id }}" class="btn btn-primary">Изменить</a> <!-- тут вызов окна изменения -->
+            </td>
+            </td>
+        </tr>
         {% endfor %}
-    </div>
+    </tbody>
+</table>
+
+<div id="popup1" class="overlay">
+  <div class="popup">
+    <form method="post">
+        {% csrf_token %}
+        <br>
+        <input type="text" placeholder="label" class="form-control" name="deal_label"><br>
+        <textarea placeholder="Message" class="form-control" name="deal_message"></textarea><br>
+        <input type="date" class="form-control" name="created_at"><br>
+        <span>{{ error }}</span>
+        <button class="btn btn-success text-teal-950" type="submit">Добавить</button>
+    </form>
+    <a class="close" href="#">&times;</a>
+  </div>    
 </div>
-{% csrf_token %}
-{% endblock deals %}
+
+{% for deal in deals %}
+<div id="popup2{{ deal.id }}" class="overlay">
+    <div class="popup">
+        <form method="post" action="{% url 'deals:update_deal' deal.id %}">
+            {% csrf_token %}
+            <br>
+            <input type="text" placeholder="label" class="form-control" name="deal_label" value="{{ deal.deal_label }}"><br>
+            <textarea placeholder="Message" class="form-control" name="deal_message">{{ deal.deal_message }}</textarea><br>
+            <input type="date" class="form-control" name="created_at" value="{{ deal.created_at|date:'Y-m-d' }}"><br>
+            <span>{{ error }}</span>
+            <button class="btn btn-success text-teal-950" type="submit">Изменить</button>
+        </form>
+        <a class="close" href="#">&times;</a>
+    </div>    
+</div>
+{% endfor %}
+
+<script>
+    // Скрпит поиска
+
+    const searchInput = document.getElementById('search-input'); // Поле ввода для поиска
+    const rows = document.querySelectorAll('.table-hover tr'); // Все строки таблицы
+
+    // Добавление обработчика события "input" для поля поиска
+    searchInput.addEventListener('input', () => {
+        const searchTerm = searchInput.value.trim().toLowerCase(); // Получение текста поиска без пробелов в начале и конце, перевод в нижний регистр
+    
+        // Перебор всех строк таблицы
+        rows.forEach(row => {
+            let rowContainsSearchTerm = false; // Флаг, указывающий, содержит ли строка текст поиска
+            
+            // Перебор всех ячеек в текущей строке
+            row.querySelectorAll('td').forEach(cell => {
+                const cellText = cell.textContent.toLowerCase(); // Текст текущей ячейки
+                if (cellText.includes(searchTerm)) { // Если текст ячейки содержит текст поиска
+                    rowContainsSearchTerm = true; // Установить флаг в true
+                }
+            });
+            
+            // Отобразить или скрыть строку в зависимости от флага
+            if (rowContainsSearchTerm) {
+                row.style.display = 'table-row'; // Отобразить строку
+            } else {
+                row.style.display = 'none'; // Скрыть строку
+            }
+        });
+    });
+</script>
+{% endblock content %}
