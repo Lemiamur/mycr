@@ -35,6 +35,18 @@ def delete_contact(request, contact_id):
     contact.delete()
     return redirect('/contacts/')
 
+def delete_selected_contacts(request):
+    if request.method == 'POST':
+        selected_contact_ids = request.POST.getlist('selected_contacts')
+
+        if not selected_contact_ids:
+            return redirect('/contacts/')
+        try:
+            Contact.objects.filter(id__in=selected_contact_ids).delete()
+        except Exception as e:
+            return redirect('/contacts/')  
+
+        return redirect('/contacts/')  
 
 def update_contact(request, contact_id):
     contact = get_object_or_404(Contact, id=contact_id)
